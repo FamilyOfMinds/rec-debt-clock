@@ -13,7 +13,9 @@ Data Sources:
 reports, state RPS compliance filings, •EPA Status and Trends Report (2025)
 
 Status:
-Prototype in development. White paper published March 2026.
+Prototype in development. White paper published March 2026. 
+Read at: 
+https://drive.google.com/file/d/1J9dLGSmO9LunwwvZeD6q_L-IEV7my7Hv/view?usp=drivesdk
 
 Author:
 Michael Bowling,
