@@ -529,6 +529,9 @@
       <p>Form EIA-930: Hourly Electric Grid Monitor</p>
       <p><a href="https://www.memhub.org/" target="_blank" rel="noopener noreferrer">Learn more at memhub.org</a></p>
       <div class="data-source">Real-time data aggregates 30+ US balancing authorities. Updates hourly.</div>
+      <div class="data-source" style="margin-top: 16px; font-size: 0.75rem; color: #5f7a99; line-height: 1.4;">
+        <strong>Aggregation Baseline:</strong> This clock measures cumulative deficit since 1996, marking the beginning of electricity market deregulation (FERC Orders 888 &amp; 889). The number represents total US electricity consumed minus total REC retirements claimed since that structural shift began.
+      </div>
     </footer>
   </div>
 
@@ -666,7 +669,7 @@
 
     // API configuration
     const API_CONFIG = {
-      endpoint: 'https://rec-clock-api.familyofminds.workers.dev/',
+      endpoint: 'https://rec-clock-api.memhub.org/',
       pollInterval: 5 * 60 * 1000, // 5 minutes
       interpolationInterval: 100 // 100ms between interpolated updates
     };
