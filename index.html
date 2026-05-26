@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>National REC Debt Clock — The Renewable Energy Gap America Isn't Tracking</title>
+  <meta name="description" content="Real-time REC debt clock monitoring the gap between US electricity consumption and renewable energy retirements. Live data from EIA, updated hourly.">
+  <meta name="theme-color" content="#0a0e27">
+
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://rec-clock.memhub.org">
+  <meta property="og:title" content="National REC Debt Clock">
+  <meta property="og:description" content="The Renewable Energy Gap America Isn't Tracking. Real-time deficit between US electricity consumption and REC retirements.">
+  <meta property="og:image" content="https://rec-clock.memhub.org/og-image.png">
+  <meta property="og:site_name" content="REC Clock">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="National REC Debt Clock">
+  <meta name="twitter:description" content="The Renewable Energy Gap America Isn't Tracking. Real-time REC debt clock.">
+  <meta name="twitter:image" content="https://rec-clock.memhub.org/og-image.png">
+
+  <!-- Additional Meta -->
+  <meta name="keywords" content="REC, renewable energy, electricity, debt clock, EIA, energy deficit">
+  <meta name="author" content="Family of Minds">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #0a0e27;
+      --bg-secondary: #131829;
+      --bg-tertiary: #1a1f3a;
+      --text-primary: #ffffff;
+      --text-secondary: #b0b8d4;
+      --accent-red: #ef4444;
+      --accent-green: #10b981;
+      --accent-gold: #f59e0b;
+      --border-color: #2a3154;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 900px;
+      width: 100%;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    h1 {
+      font-size: 3.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #ffffff 0%, #b0b8d4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      font-weight: 400;
+      letter-spacing: 0.5px;
+    }
+
+    .main-display {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 40px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+
+    .deficit-label {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+
+    .deficit-value {
+      font-size: 5rem;
+      font-weight: 700;
+      color: var(--accent-red);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+      margin-bottom: 8px;
+      font-family: 'Share Tech Mono', 'Monaco', 'Menlo', 'Courier New', monospace;
+      letter-spacing: 0.15em;
+      text-shadow: 0 0 10px rgba(239, 68, 68, 0.5), 0 0 20px rgba(239, 68, 68, 0.3);
+    }
+
+    .deficit-unit {
+      font-size: 1.5rem;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    .deficit-description {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    .secondary-displays {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .display-card {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 28px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      transition: border-color 0.3s ease;
+    }
+
+    .display-card:hover {
+      border-color: var(--accent-gold);
+    }
+
+    .card-label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    .card-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      font-family: 'Share Tech Mono', 'Monaco', 'Menlo', 'Courier New', monospace;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+
+    .card-unit {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+
+    .update-time {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-align: center;
+      margin-bottom: 40px;
+      font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+    }
+
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding-top: 32px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    footer p {
+      margin-bottom: 12px;
+    }
+
+    footer a {
+      color: var(--accent-gold);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    footer a:hover {
+      color: var(--text-primary);
+      text-decoration: underline;
+    }
+
+    .data-source {
+      font-size: 0.8rem;
+      color: #7a8099;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 640px) {
+      h1 {
+        font-size: 2.5rem;
+      }
+
+      .subtitle {
+        font-size: 1rem;
+      }
+
+      .main-display {
+        padding: 28px 20px;
+        margin-bottom: 28px;
+      }
+
+      .deficit-value {
+        font-size: 3.5rem;
+      }
+
+      .deficit-unit {
+        font-size: 1.1rem;
+      }
+
+      .secondary-displays {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin-bottom: 28px;
+      }
+
+      .display-card {
+        padding: 20px;
+      }
+
+      .card-value {
+        font-size: 2rem;
+      }
+
+      .card-unit {
+        font-size: 0.8rem;
+      }
+
+      footer {
+        padding-top: 24px;
+      }
+    }
+
+    /* Bulb-flip animation keyframes */
+    @keyframes bulbFlip {
+      0% {
+        opacity: 1;
+        text-shadow: 0 0 10px rgba(239, 68, 68, 0.5), 0 0 20px rgba(239, 68, 68, 0.3);
+      }
+      50% {
+        opacity: 0.6;
+        text-shadow: 0 0 20px rgba(239, 68, 68, 0.8), 0 0 40px rgba(239, 68, 68, 0.6);
+      }
+      100% {
+        opacity: 1;
+        text-shadow: 0 0 10px rgba(239, 68, 68, 0.5), 0 0 20px rgba(239, 68, 68, 0.3);
+      }
+    }
+
+    @keyframes flicker {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.98;
+      }
+    }
+
+    .flipping {
+      animation: bulbFlip 0.1s ease-in-out;
+    }
+
+    .value-display {
+      animation: flicker 2s ease-in-out infinite;
+    }
+
+    .consumption-card .card-value {
+      color: var(--accent-gold);
+      text-shadow: 0 0 10px rgba(245, 158, 11, 0.4), 0 0 20px rgba(245, 158, 11, 0.2);
+    }
+
+    .retirements-card .card-value {
+      color: var(--accent-green);
+      text-shadow: 0 0 10px rgba(16, 185, 129, 0.4), 0 0 20px rgba(16, 185, 129, 0.2);
+    }
+
+    /* Animation classes */
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.8;
+      }
+    }
+
+    .updating {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    /* About Modal Styling */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 32px;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 16px;
+    }
+
+    .modal-header h2 {
+      font-size: 1.8rem;
+      margin: 0;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s ease;
+    }
+
+    .modal-close:hover {
+      color: var(--text-primary);
+    }
+
+    .modal-body {
+      line-height: 1.6;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .modal-body h3 {
+      color: var(--text-primary);
+      margin-top: 16px;
+      margin-bottom: 8px;
+      font-size: 1.1rem;
+    }
+
+    .modal-body p {
+      margin-bottom: 12px;
+    }
+
+    .modal-body ul {
+      margin-left: 20px;
+      margin-bottom: 12px;
+    }
+
+    .modal-body li {
+      margin-bottom: 6px;
+    }
+
+    .modal-footer {
+      border-top: 1px solid var(--border-color);
+      padding-top: 16px;
+      margin-top: 20px;
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .modal-link {
+      display: inline-block;
+      padding: 8px 16px;
+      background: var(--accent-gold);
+      color: var(--bg-primary);
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.2s ease;
+    }
+
+    .modal-link:hover {
+      background: #fbbf24;
+    }
+
+    /* About button in header */
+    .about-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--accent-gold);
+      color: var(--bg-primary);
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+      transition: all 0.2s ease;
+      z-index: 999;
+    }
+
+    .about-button:hover {
+      background: #fbbf24;
+      box-shadow: 0 6px 16px rgba(245, 158, 11, 0.5);
+      transform: scale(1.1);
+    }
+
+    @media (max-width: 640px) {
+      .modal-content {
+        max-width: calc(100% - 40px);
+        padding: 24px;
+      }
+
+      .modal-header h2 {
+        font-size: 1.4rem;
+      }
+
+      .about-button {
+        bottom: 16px;
+        right: 16px;
+        width: 44px;
+        height: 44px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>National REC Debt Clock</h1>
+      <p class="subtitle">The Renewable Energy Gap America Isn't Tracking</p>
+    </header>
+
+    <div class="update-time">
+      <span id="last-updated">Last updated: Loading...</span>
+      <div id="update-error" style="display: none; color: var(--accent-red); margin-top: 8px; font-size: 0.9rem;"></div>
+    </div>
+
+    <div class="main-display">
+      <div class="deficit-label">Renewable Energy Deficit</div>
+      <div class="deficit-value value-display" id="deficit-display">0.0000</div>
+      <div class="deficit-unit">TWh (Terawatt-hours)</div>
+      <div class="deficit-description">US electricity consumption exceeding REC retirements</div>
+    </div>
+
+    <div class="secondary-displays">
+      <div class="display-card consumption-card">
+        <div class="card-label">US Electricity Consumption</div>
+        <div class="card-value value-display" id="consumption-display">0.0000</div>
+        <div class="card-unit">TWh</div>
+      </div>
+
+      <div class="display-card retirements-card">
+        <div class="card-label">REC Retirements Baseline</div>
+        <div class="card-value value-display" id="retirements-display">0.0000</div>
+        <div class="card-unit">TWh/hour</div>
+      </div>
+    </div>
+
+    <footer>
+      <p>Data sourced from <a href="https://www.eia.gov/opendata/" target="_blank" rel="noopener noreferrer">U.S. Energy Information Administration (EIA) API</a></p>
+      <p>Form EIA-930: Hourly Electric Grid Monitor</p>
+      <p><a href="https://www.memhub.org/" target="_blank" rel="noopener noreferrer">Learn more at memhub.org</a></p>
+      <div class="data-source">Real-time data aggregates 30+ US balancing authorities. Updates hourly.</div>
+    </footer>
+  </div>
+
+  <!-- About Button -->
+  <button class="about-button" id="about-button" aria-label="About REC Clock">?</button>
+
+  <!-- About Modal -->
+  <div class="modal" id="about-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>About REC Clock</h2>
+        <button class="modal-close" id="modal-close" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <h3>What is REC Debt?</h3>
+        <p>The REC Debt Clock tracks the real-time gap between US electricity consumption and renewable energy retirements. A positive deficit (in red) means America is consuming more electricity than its renewable energy certificates can cover.</p>
+
+        <h3>Why This Matters</h3>
+        <p>While America has committed to clean energy targets, the grid still relies on fossil fuels to bridge the gap. This clock visualizes that gap in real-time, powered by hourly data from the U.S. Energy Information Administration.</p>
+
+        <h3>How It Works</h3>
+        <ul>
+          <li><strong>Consumption:</strong> Total US electricity demand across 30+ balancing authorities</li>
+          <li><strong>REC Retirements:</strong> Baseline of 725 TWh/year (NREL, EPA GATS average)</li>
+          <li><strong>Deficit:</strong> Consumption minus retirements—the energy gap</li>
+        </ul>
+
+        <h3>Data Source</h3>
+        <p>Real-time data comes from the <a href="https://www.eia.gov/opendata/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-gold);">EIA Form EIA-930 API</a> (Hourly Electric Grid Monitor), covering 2019-present with 30+ US balancing authorities.</p>
+
+        <h3>About FOM</h3>
+        <p>Built by <a href="https://www.memhub.org/" target="_blank" rel="noopener noreferrer" style="color: var(--accent-gold);">Family of Minds</a> as a research and visualization tool for renewable energy tracking.</p>
+
+        <div class="modal-footer">
+          <a href="https://www.memhub.org/" target="_blank" rel="noopener noreferrer" class="modal-link">memhub.org</a>
+          <a href="https://www.eia.gov/opendata/" target="_blank" rel="noopener noreferrer" class="modal-link">EIA API</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Placeholder data for verification
+    const placeholderData = {
+      consumption_twh: 0.4001,
+      rec_retirements_twh: 0.000083,
+      deficit_twh: 0.3999,
+      last_updated: new Date().toISOString(),
+      timestamp_epoch: Date.now()
+    };
+
+    // Track previous values for animation triggers
+    let previousValues = { ...placeholderData };
+
+    function formatNumber(num) {
+      return num.toFixed(4);
+    }
+
+    function formatTimestamp(isoString) {
+      const date = new Date(isoString);
+      return date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZone: 'America/New_York'
+      }) + ' ET';
+    }
+
+    function triggerDigitFlip(element, oldValue, newValue) {
+      // Only trigger animation if value actually changed
+      if (oldValue === newValue) return;
+
+      // Remove animation class to reset
+      element.classList.remove('flipping');
+
+      // Force reflow to restart animation
+      void element.offsetWidth;
+
+      // Add animation class
+      element.classList.add('flipping');
+
+      // Remove class after animation completes (100ms)
+      setTimeout(() => {
+        element.classList.remove('flipping');
+      }, 100);
+    }
+
+    function updateDisplayWithAnimation(data) {
+      const deficitElement = document.getElementById('deficit-display');
+      const consumptionElement = document.getElementById('consumption-display');
+      const retirementsElement = document.getElementById('retirements-display');
+
+      // Get formatted strings for comparison
+      const newDeficit = formatNumber(data.deficit_twh);
+      const newConsumption = formatNumber(data.consumption_twh);
+      const newRetirements = (data.rec_retirements_twh).toFixed(6);
+
+      const oldDeficit = formatNumber(previousValues.deficit_twh);
+      const oldConsumption = formatNumber(previousValues.consumption_twh);
+      const oldRetirements = (previousValues.rec_retirements_twh).toFixed(6);
+
+      // Update deficit (rightmost digits, most frequent updates)
+      if (newDeficit !== oldDeficit) {
+        triggerDigitFlip(deficitElement, oldDeficit, newDeficit);
+        deficitElement.textContent = newDeficit;
+        previousValues.deficit_twh = data.deficit_twh;
+      }
+
+      // Update consumption (middle digits, less frequent)
+      if (newConsumption !== oldConsumption) {
+        triggerDigitFlip(consumptionElement, oldConsumption, newConsumption);
+        consumptionElement.textContent = newConsumption;
+        previousValues.consumption_twh = data.consumption_twh;
+      }
+
+      // Update retirements (leftmost digits, rarely changes)
+      if (newRetirements !== oldRetirements) {
+        triggerDigitFlip(retirementsElement, oldRetirements, newRetirements);
+        retirementsElement.textContent = newRetirements;
+        previousValues.rec_retirements_twh = data.rec_retirements_twh;
+      }
+
+      // Always update timestamp
+      document.getElementById('last-updated').textContent = 'Last updated: ' + formatTimestamp(data.last_updated);
+    }
+
+    function updateDisplay(data) {
+      // Legacy function for backward compatibility
+      updateDisplayWithAnimation(data);
+    }
+
+    // API configuration
+    const API_CONFIG = {
+      endpoint: 'https://rec-clock-api.familyofminds.workers.dev/',
+      pollInterval: 5 * 60 * 1000, // 5 minutes
+      interpolationInterval: 100 // 100ms between interpolated updates
+    };
+
+    // Tracking state for interpolation
+    let apiState = {
+      lastFetch: null,
+      lastFetchTime: null,
+      interpolationTimer: null,
+      pollTimer: null,
+      isError: false,
+      currentData: placeholderData
+    };
+
+    /**
+     * Fetch latest data from REC Clock Worker API
+     */
+    async function fetchClockData() {
+      try {
+        const response = await fetch(API_CONFIG.endpoint);
+
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Validate required fields
+        if (!data.consumption_twh || data.rec_retirements_twh === undefined) {
+          throw new Error('Invalid response format');
+        }
+
+        apiState.lastFetch = data;
+        apiState.lastFetchTime = Date.now();
+        apiState.isError = false;
+
+        // Update display with new data
+        updateDisplayWithAnimation(data);
+        apiState.currentData = data;
+
+        return data;
+      } catch (error) {
+        console.error('Failed to fetch REC Clock data:', error);
+        apiState.isError = true;
+
+        // Show error state but keep animations running
+        const errorElement = document.getElementById('update-error');
+        if (errorElement) {
+          errorElement.textContent = 'Data temporarily unavailable';
+          errorElement.style.display = 'block';
+        }
+
+        return null;
+      }
+    }
+
+    /**
+     * Interpolate deficit value between fetches
+     * Assumes linear increase based on average consumption rate
+     */
+    function interpolateDeficit(lastData, timeSinceLastFetch) {
+      if (!lastData) return null;
+
+      // Calculate approximate increase per millisecond
+      // Average US consumption ~0.4 TWh, REC retirements ~0.000083 TWh/hour
+      // Deficit increases at roughly consumption rate
+      const avgConsumptionMWhPerMs = (lastData.consumption_twh * 1_000_000) / (60 * 60 * 1000);
+      const mwhIncrease = avgConsumptionMWhPerMs * timeSinceLastFetch;
+      const twhIncrease = mwhIncrease / 1_000_000;
+
+      // Return interpolated deficit (increases by ~consumption amount per update)
+      return lastData.deficit_twh + twhIncrease;
+    }
+
+    /**
+     * Continuous interpolation between API fetches
+     */
+    function startInterpolation() {
+      // Clear any existing timer
+      if (apiState.interpolationTimer) {
+        clearInterval(apiState.interpolationTimer);
+      }
+
+      apiState.interpolationTimer = setInterval(() => {
+        if (!apiState.lastFetch || apiState.isError) {
+          return;
+        }
+
+        const timeSinceLastFetch = Date.now() - apiState.lastFetchTime;
+        const interpolatedDeficit = interpolateDeficit(apiState.lastFetch, timeSinceLastFetch);
+
+        if (interpolatedDeficit !== null) {
+          // Create interpolated data object
+          const interpolatedData = {
+            ...apiState.lastFetch,
+            deficit_twh: interpolatedDeficit,
+            // Note: consumption and retirements don't change between fetches
+          };
+
+          updateDisplayWithAnimation(interpolatedData);
+        }
+      }, API_CONFIG.interpolationInterval);
+    }
+
+    /**
+     * Start polling the API at regular intervals
+     */
+    function startPolling() {
+      // Fetch immediately on page load
+      fetchClockData().then(() => {
+        startInterpolation();
+      });
+
+      // Poll for new data at configured interval
+      if (apiState.pollTimer) {
+        clearInterval(apiState.pollTimer);
+      }
+
+      apiState.pollTimer = setInterval(async () => {
+        const data = await fetchClockData();
+        if (data) {
+          // Reset interpolation with new baseline
+          startInterpolation();
+        }
+      }, API_CONFIG.pollInterval);
+    }
+
+    /**
+     * Stop all timers (cleanup)
+     */
+    function stopPolling() {
+      if (apiState.pollTimer) {
+        clearInterval(apiState.pollTimer);
+        apiState.pollTimer = null;
+      }
+      if (apiState.interpolationTimer) {
+        clearInterval(apiState.interpolationTimer);
+        apiState.interpolationTimer = null;
+      }
+    }
+
+    // Initialize with placeholder data
+    updateDisplay(placeholderData);
+
+    // Expose API functions
+    window.updateRECClockData = updateDisplay;
+    window.updateRECClockDataAnimated = updateDisplayWithAnimation;
+    window.fetchClockData = fetchClockData;
+    window.startPolling = startPolling;
+    window.stopPolling = stopPolling;
+
+    // Start polling on page load
+    startPolling();
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      stopPolling();
+    });
+
+    /**
+     * Modal Management
+     */
+    const modal = document.getElementById('about-modal');
+    const aboutButton = document.getElementById('about-button');
+    const modalClose = document.getElementById('modal-close');
+
+    // Open modal
+    aboutButton.addEventListener('click', () => {
+      modal.classList.add('active');
+    });
+
+    // Close modal on X button
+    modalClose.addEventListener('click', () => {
+      modal.classList.remove('active');
+    });
+
+    // Close modal when clicking outside the modal content
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) {
+        modal.classList.remove('active');
+      }
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && modal.classList.contains('active')) {
+        modal.classList.remove('active');
+      }
+    });
+  </script>
+</body>
+</html>
